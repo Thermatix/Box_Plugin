@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+
+  "name": "Box for Chrome",
+  "description": "This extention allows a person to save files directly to box",
+  "version": "1.0",
+  "content_scripts": [{
+      "matches": ["<all_urls>"],
+      "css":["settings.css"],
+      "js":["functions.js"]
+    }],
+  "permissions": [
+    "contextMenus",
+    "identity",
+    "tabs",
+    "storage",
+    "http://*/*",
+    "https://*/*",
+    "https://www.box.com/api/",
+    "https://api.box.com/2.0/",
+    "https://upload.box.com/api/2.0/files/content"
+  ],
+  "background" : {
+    "persistent" : false,
+    "scripts" : ["background.js"]
+  },
+  "icons" : {
+    "16"            : "images/x16.png",
+    "32"            : "images/x32.png",
+    "64"            : "images/x64.png",
+    "48"            : "images/x48.png",
+    "128"           : "images/x128.png"  
+  },
+  "browser_action": {
+    "default_title" : "x32Icon", 
+    "default_icon"  : "images/x32.png",
+    "default_popup" : "settings.html"
+  }
+}
