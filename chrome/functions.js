@@ -1,3 +1,4 @@
+var storage = chrome.storage.local
 function timeNow (addingH,addingM) {
 	var d = new Date()
 	var h = d.getHours() + (addingH || 0)
@@ -11,6 +12,17 @@ function timeNow (addingH,addingM) {
 	}
 	return [h,m]
 }
+
+function tokensSet (callback) {
+	storage.get('boxTokens',function (result) {
+		if(typeof result['boxTokens'].access_token == 'undefined'){
+			callback(false)
+		}else{
+			callback(result['boxTokens'])
+		}
+	})
+}
+
 
 Request = function (){}
 Request.prototype.client = new XMLHttpRequest()

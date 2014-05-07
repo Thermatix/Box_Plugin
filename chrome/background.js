@@ -1,3 +1,4 @@
+
 function Notifier() {}
 
 // Returns "true" if this browser supports notifications.
@@ -32,7 +33,7 @@ Notifier.prototype.Notify = function(icon, title, body) {
 
 //Set up context menu at install time.
 chrome.runtime.onInstalled.addListener(function () {
-	var contexts = ["selection","link","image"]
+	var contexts = ["link","image"]
 	var title = "Save %s to your box account"
 	var id = chrome.contextMenus.create({
 		"title" : title, 
@@ -48,9 +49,18 @@ chrome.contextMenus.onClicked.addListener(onClickHandler)
 //click callback
 
 function onClickHandler(info, tab) {
-	var text = info.selectionText
+	// var text = info.selectionText
 	var image = info.srcUrl 
 	var link = info.linkUrl
-	var notify = new Notifier()
+	// var notify = new Notifier()
+  tokensSet(function (result){
+   var tokens = result
+   console.log(tokens)
+   if(!tokens){
+     alert('You need to be logged in to upload anything to your box account')
+   }else{
+     alert('File is Uploading!')
+   }
+  })
 	// var notify.notify('images/x16', 'File upload progress', 'upload.html')
 }

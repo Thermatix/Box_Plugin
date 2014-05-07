@@ -1,4 +1,4 @@
-var storage = chrome.storage.local
+
 var oauth = {
   "extAppId"      : "lq22uc0fc3egk14v8cama07b4jnov6bg",
   "extAppSecret"  : "AQPzrv8lmb1Kw2SlkStNZuWlyCjfihrX",
@@ -45,15 +45,7 @@ function getBoxAuthURL () {
 	return host + responseType + clientID + redirect
 }
 
-function tokensSet (callback) {
-	storage.get('boxTokens',function (result) {
-		if(typeof result['boxTokens'].access_token == 'undefined'){
-			callback(false)
-		}else{
-			callback(result['boxTokens'])
-		}
-	})
-}
+
 
 function deleteTokens () {
 	var obj = {'boxTokens' : null}
@@ -91,12 +83,23 @@ function addListener () {
 
 }
 
+
+function tokensSet (callback) {
+	storage.get('boxTokens',function (result) {
+		if(typeof result['boxTokens'].access_token == 'undefined'){
+			callback(false)
+		}else{
+			callback(result['boxTokens'])
+		}
+	})
+}
+
 window.onload = function() {
 	var tokens = {}
 	tokensSet(function (result){
 		tokens = result
 	})
-	
+	console.log(tokens)
 	setTimeout(function () {
 		var loginArea = document.getElementById("login")
 		if(!tokens){

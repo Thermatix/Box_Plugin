@@ -22,7 +22,7 @@
   ],
   "background" : {
     "persistent" : false,
-    "scripts" : ["background.js"]
+    "scripts" : ["functions.js","background.js"]
   },
   "icons" : {
     "16"            : "images/x16.png",
