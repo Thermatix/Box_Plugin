@@ -1,35 +1,24 @@
 
-function Notifier() {}
+var oauth = {
+  "extAppId"      : "lq22uc0fc3egk14v8cama07b4jnov6bg",
+  "extAppSecret"  : "AQPzrv8lmb1Kw2SlkStNZuWlyCjfihrX",
+  "appID"         : chrome.runtime.id,
+  "redirect"      : 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb',
+  "access_token"  : '',
+  "refresh_token" : ''
+}
+var tokenTime = 0.0
 
-// Returns "true" if this browser supports notifications.
-Notifier.prototype.HasSupport = function() {
-  if (window.webkitNotifications) {
-    return true;
-  } else {
-    return false;
+chrome.storage.onChanged.addListener(function (changes, areaName){
+  if(areaName == 'local'){
+   if(typeof changes['boxTokens'] !== 'undefined'){
+    tokenTime = changes['boxTokens'].timeset
+    var d = 
+    checkKeyTime
+   }
   }
-}
-
-// Request permission for this page to send notifications. If allowed,
-// calls function "cb" with "true" as the first argument.
-Notifier.prototype.RequestPermission = function(cb) {
-  window.webkitNotifications.requestPermission(function() {
-    if (cb) { cb(window.webkitNotifications.checkPermission() == 0); }
-  });
-}
-
-// Popup a notification with icon, title, and body. Returns false if
-// permission was not granted.
-Notifier.prototype.Notify = function(icon, title, body) {
-  if (window.webkitNotifications.checkPermission() == 0) {
-    var popup = window.webkitNotifications.createNotification(
-      icon, title, body);
-    popup.show();
-    return true;
-  }
-
-  return false;
-}
+})
+//listner for tokens
 
 //Set up context menu at install time.
 chrome.runtime.onInstalled.addListener(function () {
@@ -42,6 +31,10 @@ chrome.runtime.onInstalled.addListener(function () {
 	})
 })
 
+function checkKeyTime () {
+
+
+}
 // add click event
 
 chrome.contextMenus.onClicked.addListener(onClickHandler)

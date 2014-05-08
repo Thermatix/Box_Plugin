@@ -84,15 +84,7 @@ function addListener () {
 }
 
 
-function tokensSet (callback) {
-	storage.get('boxTokens',function (result) {
-		if(typeof result['boxTokens'].access_token == 'undefined'){
-			callback(false)
-		}else{
-			callback(result['boxTokens'])
-		}
-	})
-}
+
 
 window.onload = function() {
 	var tokens = {}
