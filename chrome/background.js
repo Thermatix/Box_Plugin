@@ -3,7 +3,6 @@ function authFlowStart  () {
       url: getBoxAuthURL(),
       interactive: true
     }, function(redirectUri){
-      console.log(redirectUri)
       handleCallbackFromBox(redirectUri,function (result) {
         var data = JSON.parse(result)
         
@@ -37,15 +36,16 @@ function handleCallbackFromBox(redirectUri,callback) {
 
 
 function setTokenRefreshTimer  (changes, areaName){
+  console.log('fired')
   if(areaName == 'local'){
-    console.log('box tokens: ' +  changes['boxTokens'].newValue)
-    console.log(changes['boxTokens'].newValue !== 'null')
-    if(changes['boxTokens'].newValue !== 'null'){
+    if(changes['boxTokens'].newValue !== null){
       var tokens = changes['boxTokens'].newValue
       var tokenTime = tokens.timeset
       var refreshToken = tokens.refresh_token
-      var timeTillRefresh =  timeCompareMilliseconds(timeNow(null,1))
-      setTimeout(getNewToken(refreshToken),Number(timeTillRefresh))
+      var timeTillRefresh =  timeCompareMilliseconds(timeNow(null,59))
+      console.log((timeTillRefresh / 60) / 1000)
+      setTimeout(function(){getNewToken(refreshToken)},timeTillRefresh)
+      return false
    }
   }
 }
@@ -81,6 +81,7 @@ function getNewToken (refreshToken) {
 
 chrome.contextMenus.onClicked.addListener(onClickHandler)
 chrome.storage.onChanged.addListener(setTokenRefreshTimer)
+rome.runtime.onStartup.addListener(getNewToken)
 
 //click callback
 
@@ -91,7 +92,6 @@ function onClickHandler(info, tab) {
 	// var notify = new Notifier()
   tokensSet(function (result){
    var tokens = result
-   console.log(tokens)
    if(!tokens){
      alert('You need to be logged in to upload anything to your box account')
    }else{

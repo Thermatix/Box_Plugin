@@ -33,7 +33,6 @@ window.onload = function() {
 		tokens = result
 	})
 	setTimeout(function () {
-		console.log(tokens)
 		var loginArea = document.getElementById("login")
 		if(!tokens){
 			loginArea.innerHTML = html.login

@@ -35,10 +35,10 @@ function timeNow (addingH,addingM) {
 }
 
 function timeCompareMilliseconds (against) {
-	var hour = 1000 * 60
+	var minutes = 1000 * 60 
 	var now = timeNow()
 	var against = new Date(against)
-	return Math.ceil((against.getTime() - now.getTime()) * hour)
+	return Math.ceil((against.getTime() - now.getTime()) * minutes)
 }
 
 function tokensSet (callback) {
