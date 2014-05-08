@@ -1,13 +1,5 @@
 
-var oauth = {
-  "extAppId"      : "lq22uc0fc3egk14v8cama07b4jnov6bg",
-  "extAppSecret"  : "AQPzrv8lmb1Kw2SlkStNZuWlyCjfihrX",
-  "appID"         : chrome.runtime.id,
-  "redirect"      : 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb',
-  "access_token"  : '',
-  "refresh_token" : ''
-}
-
+var background = chrome.extension.getBackgroundPage()
 var html = {
 	login : '<h2 id="title" class="title">Please Login</h2>' +
 		'<p id="text" class="infomation">' +
@@ -22,59 +14,11 @@ var html = {
 }
 
 
-function handleCallbackFromBox(redirectUri,callback) {
-	var code_match = /(?:&code=){1}(.*)$|\&/g
-	var code = code_match.exec(redirectUri)[1]
-	if(code == 'null'){
-		callback(new Error('Invalid redirect URI, unable to get code'))
-	}else{
-
-		var data = 'grant_type=authorization_code' + '&code=' + code + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret 
-		var path = 'https://www.box.com/api/oauth2/token'
-
-		req = new Request()
-		req.post(path,data,callback)
-	}
-}
-
-function getBoxAuthURL () {
-	var host = 'https://www.box.com/api/oauth2/authorize?'
-	var responseType = 'response_type=code'
-	var clientID = '&client_id='+ oauth.extAppId
-	var redirect = '&redirect_uri=' + oauth.redirect
-	return host + responseType + clientID + redirect
-}
-
-
-
-function deleteTokens () {
-	var obj = {'boxTokens' : null}
-	storage.set(obj)
-}
 function boxLogin () {
 	var loginArea = document.getElementById("login")
 	loginArea.innerHTML = html.processing
-	chrome.identity.launchWebAuthFlow({
-		url: getBoxAuthURL(),
-		interactive: true
-	}, function(redirectUri) {
-		var status = document.getElementById("status")
-		status.innerHTML = "processing"
-		handleCallbackFromBox(redirectUri,function (result) {
-			var data = JSON.parse(result)
-			
-			var obj = {'boxTokens': {
-				access_token : data.access_token,
-				refresh_token : data.refresh_token,
-				timeset : timeNow(null,59)
-			}}
-			var image = document.getElementById("image")
-			var status = document.getElementById("status")
-			image.style.display = 'none'
-			status.innerHTML = "done"
-			storage.set(obj)
-		})
-	})
+	background.authFlowStart()
+	
 }
 
 function addListener () {
@@ -83,23 +27,19 @@ function addListener () {
 
 }
 
-
-
-
 window.onload = function() {
 	var tokens = {}
 	tokensSet(function (result){
 		tokens = result
 	})
-	console.log(tokens)
 	setTimeout(function () {
+		console.log(tokens)
 		var loginArea = document.getElementById("login")
 		if(!tokens){
-			console.log('need to login')
 			loginArea.innerHTML = html.login
 			addListener()
 		}else{
-			if(Number(timeNow().join('.')) > Number(tokens.timeset.join('.')) ){
+			if(new Date(tokens.timeset) < timeNow() ) {
 				loginArea.innerHTML = html.login
 				addListener()
 			}else{

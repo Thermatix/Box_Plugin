@@ -9,35 +9,45 @@ var oauth = {
   "refresh_token" : ''
 }
 //-----------------------------------------------
+
+function getBoxAuthURL () {
+	var host = 'https://www.box.com/api/oauth2/authorize?'
+	var responseType = 'response_type=code'
+	var clientID = '&client_id='+ oauth.extAppId
+	var redirect = '&redirect_uri=' + oauth.redirect
+	return host + responseType + clientID + redirect
+}
+
+function deleteTokens () {
+	var obj = {'boxTokens' : null}
+	storage.set(obj)
+}
+
 function timeNow (addingH,addingM) {
-	var d = new Date()
-	var h = d.getHours() + (addingH || 0)
-	var m = d.getMinutes() + (addingM || 0)
-	if(m > 60){ 
-		m = m - 60
-		h = h + 1
-	}
-	if(h > 24){
-		h = 0
-	}
-	return [h,m]
+	this.time = new Date()
+	this.time.setHours(time.getHours() + (addingH || 0))
+	this.time.setMinutes(time.getMinutes() + (addingM || 0))
+	return this.time
+}
+  inMills = function (time) {
+	var hour = 1000 * 60 
+	return time.getTime() / hour
 }
 
 function timeCompareMilliseconds (against) {
-	var minute = 1000 * 60 // in milliseconds
-	var timenow = timeNow()
-												// minutes     hours
-	var timenowMil = minute * timenow[1] * timenow[0]
-	var timeAgainstMil = minute * against[1] * against[0]
-	return (timeAgainstMil - timenowMil)
+	var hour = 1000 * 60
+	var now = timeNow()
+	var against = new Date(against)
+	return Math.ceil((against.getTime() - now.getTime()) * hour)
 }
 
 function tokensSet (callback) {
 	storage.get('boxTokens',function (result) {
-		if(typeof result['boxTokens'].access_token == 'undefined'){
+		var returning = result['boxTokens']
+		if(returning == 'null'){
 			callback(false)
 		}else{
-			callback(result['boxTokens'])
+			callback(returning)
 		}
 	})
 }

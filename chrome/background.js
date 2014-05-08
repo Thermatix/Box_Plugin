@@ -1,23 +1,54 @@
+function authFlowStart  () {
+    chrome.identity.launchWebAuthFlow({
+      url: getBoxAuthURL(),
+      interactive: true
+    }, function(redirectUri){
+      console.log(redirectUri)
+      handleCallbackFromBox(redirectUri,function (result) {
+        var data = JSON.parse(result)
+        
+        var obj = {'boxTokens': {
+          access_token : data.access_token,
+          refresh_token : data.refresh_token,
+          timeset : timeNow(null,59).toString()
+        }}
+        storage.set(obj)
+        tokensSet(function (result){
+          console.log(result)
+        })
+      })
+    })
+  }
 
-var oauth = {
-  "extAppId"      : "lq22uc0fc3egk14v8cama07b4jnov6bg",
-  "extAppSecret"  : "AQPzrv8lmb1Kw2SlkStNZuWlyCjfihrX",
-  "appID"         : chrome.runtime.id,
-  "redirect"      : 'https://' + chrome.runtime.id + '.chromiumapp.org/provider_cb',
-  "access_token"  : '',
-  "refresh_token" : ''
+function handleCallbackFromBox(redirectUri,callback) {
+  var code_match = /(?:&code=){1}(.*)$|\&/g
+  var code = code_match.exec(redirectUri)[1]
+  if(code == 'null'){
+    callback(new Error('Invalid redirect URI, unable to get code'))
+  }else{
+
+    var data = 'grant_type=authorization_code' + '&code=' + code + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret 
+    var path = 'https://www.box.com/api/oauth2/token'
+
+    req = new Request()
+    req.post(path,data,callback)
+  }
 }
-var tokenTime = 0.0
 
-chrome.storage.onChanged.addListener(function (changes, areaName){
+
+function setTokenRefreshTimer  (changes, areaName){
   if(areaName == 'local'){
-   if(typeof changes['boxTokens'] !== 'undefined'){
-    tokenTime = changes['boxTokens'].timeset
-    var d = 
-    checkKeyTime
+    console.log('box tokens: ' +  changes['boxTokens'].newValue)
+    console.log(changes['boxTokens'].newValue !== 'null')
+    if(changes['boxTokens'].newValue !== 'null'){
+      var tokens = changes['boxTokens'].newValue
+      var tokenTime = tokens.timeset
+      var refreshToken = tokens.refresh_token
+      var timeTillRefresh =  timeCompareMilliseconds(timeNow(null,1))
+      setTimeout(getNewToken(refreshToken),Number(timeTillRefresh))
    }
   }
-})
+}
 //listner for tokens
 
 //Set up context menu at install time.
@@ -31,13 +62,25 @@ chrome.runtime.onInstalled.addListener(function () {
 	})
 })
 
-function checkKeyTime () {
-
-
+//get a new token
+function getNewToken (refreshToken) {
+  var data = 'grant_type=refresh_token' + '&refresh_token=' + refreshToken + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret 
+  var path = 'https://www.box.com/api/oauth2/token'
+  req = new Request()
+  req.post(path,data,function(result){
+    var data = JSON.parse(result)
+    var obj = {'boxTokens': {
+      access_token : data.access_token,
+      refresh_token : data.refresh_token,
+      timeset : timeNow(null,59).toString()
+    }}
+    storage.set(obj)
+  })
 }
 // add click event
 
 chrome.contextMenus.onClicked.addListener(onClickHandler)
+chrome.storage.onChanged.addListener(setTokenRefreshTimer)
 
 //click callback
 
