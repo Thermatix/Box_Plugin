@@ -1,11 +1,11 @@
-function authFlowStart  () {
+function authFlowStart  () { //start authentication flow for when a user clicks 'login to box' from popup menu
     chrome.identity.launchWebAuthFlow({
       url: getBoxAuthURL(),
       interactive: true
     }, function(redirectUri){
       handleCallbackFromBox(redirectUri,function (result) {
         var data = JSON.parse(result)
-        
+
         var obj = {'boxTokens': {
           access_token : data.access_token,
           refresh_token : data.refresh_token,
@@ -19,14 +19,14 @@ function authFlowStart  () {
     })
   }
 
-function handleCallbackFromBox(redirectUri,callback) {
+function handleCallbackFromBox(redirectUri,callback) { // handles getting the auth_code from box after user has cliked 'authorise' on box login website and then makes request for access_token
   var code_match = /(?:&code=){1}(.*)$|\&/g
   var code = code_match.exec(redirectUri)[1]
   if(code == 'null'){
     callback(new Error('Invalid redirect URI, unable to get code'))
   }else{
 
-    var data = 'grant_type=authorization_code' + '&code=' + code + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret 
+    var data = 'grant_type=authorization_code' + '&code=' + code + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret
     var path = 'https://www.box.com/api/oauth2/token'
 
     req = new Request()
@@ -35,7 +35,7 @@ function handleCallbackFromBox(redirectUri,callback) {
 }
 
 
-function setTokenRefreshTimer  (changes, areaName){
+function setTokenRefreshTimer  (changes, areaName){ //sets refresh timer for token refresh
   console.log('fired')
   if(areaName == 'local'){
     if(changes['boxTokens'].newValue !== null){
@@ -49,22 +49,21 @@ function setTokenRefreshTimer  (changes, areaName){
    }
   }
 }
-//listner for tokens
 
-//Set up context menu at install time.
-chrome.runtime.onInstalled.addListener(function () {
+
+chrome.runtime.onInstalled.addListener(function () { //Set up context menu at install time.
 	var contexts = ["link","image"]
 	var title = "Save %s to your box account"
 	var id = chrome.contextMenus.create({
-		"title" : title, 
+		"title" : title,
 		"contexts" : contexts,
 		 "id" : "boxupload" + contexts.join('_')
 	})
 })
 
-//get a new token
-function getNewToken (refreshToken) {
-  var data = 'grant_type=refresh_token' + '&refresh_token=' + refreshToken + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret 
+
+function getNewToken (refreshToken) { // this is to get a new token
+  var data = 'grant_type=refresh_token' + '&refresh_token=' + refreshToken + '&client_id=' + oauth.extAppId + '&client_secret=' + oauth.extAppSecret
   var path = 'https://www.box.com/api/oauth2/token'
   req = new Request()
   req.post(path,data,function(result){
@@ -79,9 +78,9 @@ function getNewToken (refreshToken) {
 }
 // add click event
 
-chrome.contextMenus.onClicked.addListener(onClickHandler)
-chrome.storage.onChanged.addListener(setTokenRefreshTimer)
-chrome.runtime.onStartup.addListener(function(){ 
+chrome.contextMenus.onClicked.addListener(onClickHandler) //adds context menu handler
+chrome.storage.onChanged.addListener(setTokenRefreshTimer) // adds token refresh timer (broken)
+chrome.runtime.onStartup.addListener(function(){ //adds listner to refresh token when chrome starts
   tokensSet(function (result){
     if (result !== false){
       getNewToken(result.refresh_token)
@@ -91,9 +90,9 @@ chrome.runtime.onStartup.addListener(function(){
 
 //click callback
 
-function onClickHandler(info, tab) {
+function onClickHandler(info, tab) { // handler for when person selects save to box in context menu
 	// var text = info.selectionText
-	var image = info.srcUrl 
+	var image = info.srcUrl
 	var link = info.linkUrl
 	// var notify = new Notifier()
   tokensSet(function (result){

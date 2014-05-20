@@ -1,4 +1,4 @@
-function Notifier() {}
+function Notifier() {} //was to be used for notifiing the user of things
 
 // Returns "true" if this browser supports notifications.
 Notifier.prototype.HasSupport = function() {
@@ -31,11 +31,11 @@ Notifier.prototype.Notify = function(icon, title, body) {
 }
 
 
-Request = function (){}
+Request = function (){} //a simple post/get client to make XMLHttp requests for ajax stuff (or getting the access_token)
 Request.prototype.client = new XMLHttpRequest()
 Request.prototype.constructor = function () {
 }
-	
+
 
 Request.prototype.get = function (url,callback) {
 	var client = this.client
