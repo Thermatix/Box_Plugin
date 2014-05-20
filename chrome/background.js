@@ -81,7 +81,13 @@ function getNewToken (refreshToken) {
 
 chrome.contextMenus.onClicked.addListener(onClickHandler)
 chrome.storage.onChanged.addListener(setTokenRefreshTimer)
-rome.runtime.onStartup.addListener(getNewToken)
+chrome.runtime.onStartup.addListener(function(){ 
+  tokensSet(function (result){
+    if (result !== false){
+      getNewToken(result.refresh_token)
+    }
+  })
+})
 
 //click callback
 
